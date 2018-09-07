@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>GraphQL and TangoGQL</title>
+	<link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/maxiv_white.css">
+    <link rel="stylesheet" href="css/theme/custom.css">
+
+</head>
+
+<body>
+	<!-- Wrap the entire slide show in a div using the "reveal" class. -->
+	<div class="reveal">
+		<!-- Wrap all slides in a single "slides" class -->
+		<div class="slides">
+
+		<!-- ALL SLIDES GO HERE -->
+		<!-- Each section element contains an individual slide -->
+		<section data-background="images/maxiv_rings.png">
+			<h1>GraphQL and TangoGQL</h1>
+            <!-- <h2>Antonio Milan on behalf of KITS - 2018</h2> -->
+			<p>Antonio Milan on behalf of KITS - 2018</p>
+            <aside class="notes" data-markdown>
+            Just present yourselve.
+            </aside>
+		</section>
+
+        <section data-markdown data-separator="^\n---\n$" data-separator-vertical="^\n--\n$">
+            <script type="text/template">
+                # Agenda
+
+                - What?
+                - Why?
+                - How?
+                - TangoGQL
+
+                ---
+
+                # What?
+
+                --
+
+                # What is GraphQL?
+
+                > GraphQL is a new API standard that provides a more efficient, powerful and flexible alternative to REST.
+
+                - GraphQL is a query language for APIs, and a server-side runtime for executing queries by using a type system you define for your data.
+                - Not language specific
+                - A Single endpoint
+                - Get what you want: Declarative data fetching. A client can specify exactly what data it needs from an API
+                - Back end Front end decoupled via Schema
+                - Database agnostic.
+
+                ---
+
+                # Why?
+
+                --
+
+                ## Why GraphQL is Better than REST?
+
+                1. Minimizes the amount of data that needs to be transferred
+                2. Improve maintainability
+                3. Fast development
+
+                >  Schema and strong type definition based. Act as a contract between back and front end.
+
+                --
+
+                ## Example
+
+                With REST API, you gather the data by accessing multiple endpoints.
+
+                Let's say you want to display the value of a device attribute.
+
+                ```
+                BASE_URL = http://w-v-kitslab-web-0:8000/tango/rest/rc3/hosts/w-v-kitslab-csdb-0.maxiv.lu.se/10000/
+
+                --> HTTP GET:  BASE_URL/devices
+                <-- list of devices
+                ```
+
+                For each device (in case you don't know the attribute name):
+
+                ```
+                --> HTTP GET: BASE_URL/devices/<device_name>/attributes
+                <-- list of attributes
+                ```
+
+                For each device (if you already know the attribute name):
+                
+                ```
+                --> HTTP GET: BASE_URL/devices/<device>/attributes/<attribute_name>/value
+                <-- {
+                      "value":27.0,
+                      "timestamp":1536317952,
+                      "name":"ampli",
+                      "quality":"ATTR_VALID"
+                    }
+
+                ```
+
+                --
+
+                With GraphQL
+
+                1 HTTP POST, query:
+
+                ```
+                {
+                    devices(pattern: "sys/tg_test/*") {
+                      attributes(pattern: "ampli") {
+                        name
+                        value
+                        timestamp
+                        quality
+                      }
+                      }
+                  }
+                ```
+
+                Answer:
+
+                ```
+                {
+                    "data": {
+                      "devices": [
+                        {
+                          "attributes": [
+                            {
+                              "name": "ampli",
+                              "value": 27,
+                              "timestamp": 1536318691,
+                              "quality": "ATTR_VALID"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ```
+
+                ---
+
+                # How?
+
+                --
+
+                ## How it Works? (Basic concepts) 
+
+                Schema is the definition of:
+
+                - Types and Fields
+                - Query
+                - Mutations
+                - Subscriptions
+
+                for your data using the GraphQL Schema Definition Language
+
+                --
+
+                ## Type and Fields
+
+                ```
+                type Device {
+                    name: String
+                    state: String
+                    properties(pattern: String): [DeviceProperty]
+                    attributes(pattern: String): [DeviceAttribute]
+                    commands(pattern: String): [DeviceCommand]
+                    server: DeviceInfo
+                    pid: Int
+                    startedDate: String
+                    stoppedDate: String
+                    exported: Boolean
+                }
+                ```
+
+                --
+
+                ## Query
+
+                - Fetch data via Resolvers
+                - Returns only the data you ask for.
+                - Allows nested information
+
+                ```
+                type Query {
+                    device(name: String!): Device!
+                }
+                ```
+
+                --
+
+                ## Mutations
+
+                3 types of mutations:
+
+                - Creating new data
+                - Updating existing data
+                - Deleting existing data
+
+                ```
+                type Mutation{
+                    putDeviceProperty(device: String!, name: String!, value: [String]): PutDeviceProperty
+                    deleteDeviceProperty(device: String!, name: String!): DeleteDeviceProperty
+                    setAttributeValue(device: String!, name: String!, value: ScalarTypes!): SetAttributeValue
+                    executeCommand(device: String!, command: String!, argin: ScalarTypes): ExecuteDeviceCommand
+                }
+                ```
+
+                --
+
+                ## Subscriptions
+
+                Real-time connection with the server in order to get informed about events
+
+                ```
+                type Subscription {
+                    changeEvent(models: [String]): ChangeEvent
+                }
+                ```
+
+                ---
+
+                # TangoGQL
+
+                GraphQL interface for Tango. Stack:
+
+                - aiohttp:
+                    - Async HTTP server with support for websockets
+                - graphene:
+                    - python library for building GraphQL APIs
+                - Taurus:
+                    - Internal implementation using TaurusAttributes 
+                - PyTango
+                - python >= 3.6
+
+                --
+
+                <img src="images/graphiql_1.png" width="80%" height="auto">
+
+                --
+
+                <img src="images/graphiql_2.png" width="80%" height="auto">
+
+
+            </script>
+        </section>
+        
+        
+        <!-- <section data-background="images/dev_hell.gif"
+        data-background-transition="zoom">
+        <h3><font color="white">Enjoy the Session!!</font></h3>
+        </section> -->
+        
+        <!-- <section>
+            <h2>Single Board Computer</h2>
+            <div id="right">
+                <img src="images/SBC.jpg" width="50%" height="auto">
+            </div>
+            <div id="left">
+                <section data-markdown>
+                    - Light Linux OS distribution: Yocto
+                    - Divided in layers:
+                      - Drivers to control HW, interfaces and FPGA
+                      - Middleware: Modular SW layer to handle communication protocols, algorithms, etc
+                      - Applications: Apps to control the equipment, i.e. web app
+                </section>
+            </div>
+            <aside class="notes" data-markdown>
+                - This is the basic block diagram, internals of EM.
+                - Left: HW, Right: Control
+            </aside>
+        </section> -->
+
+        <!-- <section>
+            <section data-markdown data-separator="^\n---\n$" data-separator-vertical="^\n--\n$">
+                <script type="text/template">
+                    ## Some title
+                </script>
+            </section>
+                <div id="left">
+                    <section data-markdown data-separator="^\n---\n$" data-separator-vertical="^\n--\n$">
+                            <script type="text/template">
+                                - Something to the left
+                                - Some more info
+                                - And something else
+                            </script>
+                        </section>                        
+                </div>
+                <div id="right">
+                    <section data-markdown data-separator="^\n---\n$" data-separator-vertical="^\n--\n$">
+                            <script type="text/template">
+                                - Something to the right
+                                ![alt text](images/maxiv_rings.png)
+                            </script>
+                        </section>                
+                </div>
+        </section> -->
+        <!-- <section>
+            <div style="text-align: left; float: left;">
+                <p data-markdown>- This is my first left element</p>
+                <p data-markdown>- This is my second left element</p>
+            </div>
+            
+            <div style="text-align: right; float: right;">
+                <p data-markdown>- This is my first right element</p>
+                <p data-markdown>- This is my second rightelement</p>
+            </div>
+        </section> -->
+
+        </div>
+	</div>
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.js"></script>
+
+	<script>
+		// Required, even if empty.
+		Reveal.initialize({
+      // More info https://github.com/hakimel/reveal.js#dependencies
+      // Display a presentation progress bar
+      progress: true,
+
+      // Display the page number of the current slide
+      slideNumber: true,
+
+      // Enable keyboard shortcuts for navigation
+      keyboard: true,
+
+      // Turns fragments on and off globally
+      fragments: true,
+
+      // Hides the address bar on mobile devices
+      hideAddressBar: true,
+
+      dependencies: [
+        { src: 'plugin/markdown/marked.js' },
+        { src: 'plugin/markdown/markdown.js' },
+        { src: 'plugin/notes/notes.js', async: true },
+        { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+        { src: 'plugin/zoom-js/zoom.js', async: true },
+      ]
+		});
+	</script>
+</body>
+</html>
